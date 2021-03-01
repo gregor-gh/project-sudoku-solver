@@ -16,7 +16,7 @@ module.exports = function (app) {
 
       // if any fields are missing then return error
       if (!puzzle||!coordinate||!value) {
-        return res.json({ error: "Required field missing" });
+        return res.json({ error: "Required field(s) missing" });
       }
 
       // validate the puzzle
