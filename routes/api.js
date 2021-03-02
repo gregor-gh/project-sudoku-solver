@@ -42,6 +42,24 @@ module.exports = function (app) {
       if (value.length !== 1 || !value.match(numberRegex)) {
         return res.json({ error: "Invalid value" });
       }
+
+      // check row placement first
+      const check = solver.checkValuePlacement(puzzle, coordinate, value);
+
+      // if all three exists props are false then placement is valid
+      if (!check.existsInRow && !check.existsInColumn && !check.existsInRegion) {
+        return res.json({ valid: true });
+      }
+
+      // otherwise build conflict array
+      let conflict = [];
+      check.existsInRow && conflict.push("row");
+      check.existsInColumn && conflict.push("column");
+      check.existsInRegion && conflict.push("region");
+      
+      // and return valid false plus conflict array
+      return res.json({ valid: false, conflict });
+
     });
     
   app.route('/api/solve')
