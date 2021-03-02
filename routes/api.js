@@ -83,5 +83,18 @@ module.exports = function (app) {
         return res.json({ error: "Invalid characters in puzzle" });
       }
 
+      // if all good then solve puzzle
+      const puzzleTest = solver.solve(puzzle)
+
+      if (puzzleTest === "fail") { // if puzzle fails
+        return res.json({ error: "Puzzle cannot be solved" }); // respond with error
+      } else {
+        return res.json({ solution: puzzleTest }); // respond with solution
+      }
+      
+      
+
+      
+
     });
 };

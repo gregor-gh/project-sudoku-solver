@@ -24,7 +24,7 @@ class SudokuSolver {
 
     // column is simpler, just subtract 1 from second coord character
     const column = Number(coordinate[1]) - 1;
-    
+
     // now call row placement check using the supplied puzzle, value and calculated row/columns
     const existsInRow = this.checkRowPlacement(puzzleString, row, value);
     const existsInColumn = this.checkColPlacement(puzzleString, column, value);
@@ -33,13 +33,13 @@ class SudokuSolver {
     // return an object containing the true false values
     return { existsInRow, existsInColumn, existsInRegion };
 
-    }
+  }
 
 
   checkRowPlacement(puzzleString, row, value) {
 
     // first extract the relevant row by multiplying the row by 9 (9 rows in a puzzle) and adding 8 to get 9 fields
-    const puzzleRow = puzzleString.substring(row * 9, row * 9 + 8);
+    const puzzleRow = puzzleString.substring(row * 9, row * 9 + 9);
 
     // now check if value exists in that row
     if (puzzleRow.indexOf(value) === -1) {
@@ -77,7 +77,7 @@ class SudokuSolver {
     // get the 3 relevant digits from each row in a region
     for (let index = 0; index < 3; index++) {
       const rowIndex = regionStart + index * 9; // start index of the nth row
-      
+
       puzzleRegion += puzzleString.substring(rowIndex, rowIndex + 3); // pull 3 characters out the main string
     }
 
@@ -91,6 +91,97 @@ class SudokuSolver {
   }
 
   solve(puzzleString) {
+
+    // split puzzlEstring into an array
+    let puzzleArray = puzzleString.split("");
+
+    // extract array of things to change
+    let changeArray = [];
+    puzzleArray.forEach((el, index) => {
+
+      // extract row and column
+      const row = Math.floor(index / 9); // floor index over nine to get row
+      const rowLetter = String.fromCharCode(row + 65); // add 65 to that number and get charcode (65 is A)
+
+      let col = Number(((index / 9) * 10).toString()[3]) + 1; // take the number after the decimal point for column, add one so it's not zero based
+      if (!col) col = 1; // if null then it divided by 9 completely, so first column
+
+      const coord = rowLetter + col; // make coord from the rowletter and column letter so we can reuse the check functions
+
+      // push every blank entry in the puzzle into an array with the index and coord
+      if (el === ".") {
+        changeArray.push({
+          index, // index to refer back to position in puzzle string
+          coord, // coord to pass to check functions
+          validValues: [] // empty array that will have valid values pushed to it later
+        });
+      }
+    });
+
+    let n = 0;
+
+    // loop through single valid-value cells
+    while (n <= 30) { // hard coding 30 to avoid never ending loop on harder puzzles
+      changeArray.forEach((el, changeIndex) => {
+
+        // try each number
+        for (let val = 1; val <= 9; val++) { // for numbers 1-9
+          let check = this.checkValuePlacement(puzzleArray.join(""), el.coord, val); // check if number is valid, passing in puzzleArray as i'll be modifying that
+          if (!check.existsInRow && !check.existsInColumn && !check.existsInRegion) { // if it is valid
+            el.validValues.push(val) // then push to the el valid value array
+          }
+        }
+
+        // check how many valid values
+        if (el.validValues.length === 1) {
+          changeArray.splice(changeIndex, 1) // remove from changearray
+          puzzleArray[el.index] = el.validValues[0]; // update puzzle array
+        }
+
+        // clear valid values array if not last run
+         if (n < 30) el.validValues = []; 
+      })
+      n += 1;
+    }
+
+    if (changeArray.length === 0) { // if no changes left to be made
+      return puzzleArray.join(""); // return solved puzzle array joined back to a string  
+    } else {
+      return "fail" // return fail if puzzle can't be solved (this will also pick up harder puzzles)
+    }
+
+    
+
+/* begun to start solving harder sudokus with brute force, not practical for harder puzzles as could take millions of iterations. 
+   shelving for now as not required for fCC tests it seems
+
+    n = 0;
+    while (n < 500) {
+
+      let testChangeArray = changeArray.map(el => { return { ...el } }); // make copies for testing
+      let testArray = [...puzzleArray]
+
+      testChangeArray.forEach((el, changeIndex) => { // loop through the remaining values
+        let rand = Math.floor(Math.random() * el.validValues.length);
+        let randPick = el.validValues[rand]; // and pikc a random index of valid value
+        let check = this.checkValuePlacement(testArray.join(""), el.coord, randPick); // check that random value
+        if (!check.existsInRow && !check.existsInColumn && !check.existsInRegion) { // if it works 
+          testChangeArray.splice(changeIndex, 1) // remove from testarray 
+          testArray[el.index] = randPick // update the test array for subsequent runs
+        }
+      })
+
+      if (testChangeArray.length == 0) { // if the array was fully cleared then all values are correct
+        n = 1000; // break loop
+        console.log("finish")
+      }
+      else {
+        console.log(testChangeArray)
+        n += 1;
+      }
+
+    }
+    */ 
 
   }
 }
