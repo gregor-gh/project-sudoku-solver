@@ -120,10 +120,10 @@ class SudokuSolver {
     });
 
     let n = 0;
-    let limit = 30;
+    let limit = 81;
 
     // loop through single valid-value cells
-    while (n <= limit) { // hard coding 30 to avoid never ending loop on harder puzzles
+    while (n <= limit) { // hard coding 81 to avoid never ending loop on harder puzzles
       changeArray.forEach((el, changeIndex) => {
 
         // try each number
@@ -151,6 +151,7 @@ class SudokuSolver {
     } else {
       return "fail" // return fail if puzzle can't be solved (this will also pick up harder puzzles)
     }
+    
 /* recursive attempt, not working (skips )
     console.log("recursive puzzle is",puzzleArray)
 
