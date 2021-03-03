@@ -1,3 +1,4 @@
+import e from "cors"
 import puzzlesAndSolutions from "./puzzle-strings.js"
 
 class SudokuSolver {
@@ -119,9 +120,10 @@ class SudokuSolver {
     });
 
     let n = 0;
+    let limit = 30;
 
     // loop through single valid-value cells
-    while (n <= 30) { // hard coding 30 to avoid never ending loop on harder puzzles
+    while (n <= limit) { // hard coding 30 to avoid never ending loop on harder puzzles
       changeArray.forEach((el, changeIndex) => {
 
         // try each number
@@ -139,7 +141,7 @@ class SudokuSolver {
         }
 
         // clear valid values array if not last run
-         if (n < 30) el.validValues = []; 
+         if (n < limit) el.validValues = []; 
       })
       n += 1;
     }
@@ -149,40 +151,41 @@ class SudokuSolver {
     } else {
       return "fail" // return fail if puzzle can't be solved (this will also pick up harder puzzles)
     }
+/* recursive attempt, not working (skips )
+    console.log("recursive puzzle is",puzzleArray)
 
-    
+    const recurse = (changeArray2, puzzleArray2) => {
 
-/* begun to start solving harder sudokus with brute force, not practical for harder puzzles as could take millions of iterations. 
-   shelving for now as not required for fCC tests it seems
+      console.log("recurse accpeting input", puzzleArray2,changeArray2)
 
-    n = 0;
-    while (n < 500) {
+      if (changeArray2.length === 0) {
+        return puzzleArray2
+      }
 
-      let testChangeArray = changeArray.map(el => { return { ...el } }); // make copies for testing
-      let testArray = [...puzzleArray]
-
-      testChangeArray.forEach((el, changeIndex) => { // loop through the remaining values
-        let rand = Math.floor(Math.random() * el.validValues.length);
-        let randPick = el.validValues[rand]; // and pikc a random index of valid value
-        let check = this.checkValuePlacement(testArray.join(""), el.coord, randPick); // check that random value
-        if (!check.existsInRow && !check.existsInColumn && !check.existsInRegion) { // if it works 
-          testChangeArray.splice(changeIndex, 1) // remove from testarray 
-          testArray[el.index] = randPick // update the test array for subsequent runs
-        }
+      let newChangeArray = [...changeArray2]
+      let newPuzzleArray = [...puzzleArray2]
+      
+      newChangeArray.forEach((el, changeIndex) => {
+        console.log("valid values for " + el.coord, el.validValues)
+        el.validValues.forEach(val => {
+          let check = this.checkValuePlacement(newPuzzleArray.join(""), el.coord, val)
+          if (!check.existsInRow && !check.existsInColumn && !check.existsInRegion) {
+            newPuzzleArray[el.index] = val
+            newChangeArray.splice(changeIndex, 1)
+            recurse(newChangeArray, newPuzzleArray)
+          }
+        })
+        console.log("broke out of valid values array for each")
+        return false
       })
-
-      if (testChangeArray.length == 0) { // if the array was fully cleared then all values are correct
-        n = 1000; // break loop
-        console.log("finish")
-      }
-      else {
-        console.log(testChangeArray)
-        n += 1;
-      }
+      return false
 
     }
-    */ 
 
+    const result = recurse(changeArray, puzzleArray)
+
+    console.log(result)
+*/
   }
 }
 
